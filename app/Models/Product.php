@@ -13,5 +13,9 @@ class Product extends Model
     {
         return $this->belongsTo(User::class, 'supplier_ref');
     }
+    public function carts()
+    {
+        return $this->hasMany(Cart::class);
+    }
 
 }

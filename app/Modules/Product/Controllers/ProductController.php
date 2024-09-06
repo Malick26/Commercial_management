@@ -17,6 +17,13 @@ class ProductController extends Controller
         $products = $productInterface->getProductsByUserId($userId); 
         return view('product::index', compact('products'));
     }
+    public function productBySupplier(int $userId, ProductRepositoryInterface $productInterface)
+    {
+      
+        $products = $productInterface->getProductsByUserId($userId);
+        return view('product::product', compact('products'));
+    }
+    
     
     public function create()
     {
@@ -68,6 +75,62 @@ class ProductController extends Controller
     public function destroy($id, ProductRepositoryInterface $productInterface){
         $productInterface->deleteProduct($id, []);
         return redirect()->route('products.index')->with('success', 'Product deleted successfully.');
+    }
+
+    public function productCart()
+    {
+        return view('product::cart'); // return cart page
+    }
+
+    public function addMovieToCart(Request $request)
+    {
+        $productId= $request->input('id');
+        $quantity = $request->input('quantity', 1);
+        $cartItemId = $request->input('cart_item_id');
+
+        $product = Product::find($productId);
+
+        if (!$product) {
+            return response()->json(['error' => 'Movie not found'], 404);
+        }
+
+        $cart = session()->get('cart', []);
+
+        if (isset($cart[$productId])) {
+            // Update quantity if product is already in the cart
+            $cart[$productId]['quantity'] += $quantity;
+        } else {
+            // Add new item to the cart
+            $cart[$productId] = [
+                'id' => $product->id,
+                'name' => $product->name,
+                'price' => $product->price,
+                'quantity' => $quantity,
+              
+            ];
+        }
+
+        session()->put('cart', $cart);
+
+        // Calculate the total quantity
+        $totalQuantity = 0;
+        foreach ($cart as $item) {
+            $totalQuantity += $item['quantity'];
+        }
+        return response()->json(['message' => 'Cart updated', 'cartCount' => $totalQuantity], 200);
+    }
+
+    
+    public function deleteItem(Request $request)
+    {
+        if($request->id) {
+            $cart = session()->get('cart');
+            if(isset($cart[$request->id])) {
+                unset($cart[$request->id]);
+                session()->put('cart', $cart);
+            }
+            session()->flash('success', 'Product successfully deleted.');
+        }
     }
 
 

@@ -29,7 +29,7 @@
                 <td>{{ $u['type'] }}</td>
                 <td>{{ $u['email'] }}</td>
                 <td>
-                <a href="" class="btn btn-primary">View Product</a>                
+                  <a href="{{ route('products.bySupplier', $u['id']) }}" class="btn btn-primary">View Product</a>
                 </td>
             </tr>
             @endforeach
